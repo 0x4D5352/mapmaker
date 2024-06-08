@@ -1,10 +1,12 @@
-from random import choice
+from random import choice, sample
 
 map_tiles = {"land": "🟩", "water": "🟦", "desert": "🟨", "mountain": "🟫"}
+tile_weightings = {"land": 0.3, "water": 0.5, "desert": 0.1, "mountain": 0.1}
 
 
-def grab_random_tile(tiles: dict) -> str:
-    return tiles[choice(list(tiles))]
+def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
+    weighted_tiles = [int(weight * 10) for weight in weights.values()]
+    return tiles[choice(sample(list(tiles), k=1, counts=weighted_tiles))]
 
 
 def find_neighbors(current_map: list, current_row: int, current_column: int) -> list:
