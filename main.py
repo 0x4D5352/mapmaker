@@ -36,8 +36,17 @@ def create_map(tiles: dict = map_tiles, size: int = 50) -> list:
     return grid
 
 
+def print_map(map: list) -> str:
+    res = ""
+    for row in map:
+        for col in row:
+            res += col
+        res += "\n"
+    return res
+
+
 def main() -> None:
-    print(f"{create_map()}")
+    print(f"{print_map(create_map())}")
     print("\n")
     response = input("go again? Y for yes, anything else is no\n> ")
     if len(response) > 0:
