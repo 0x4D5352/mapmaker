@@ -1,7 +1,12 @@
 from random import choice, sample
+from time import sleep
+from os import system
 
 map_tiles = {"land": "🟩", "water": "🟦", "desert": "🟨", "mountain": "🟫"}
-tile_weightings = {"land": 0.3, "water": 0.5, "desert": 0.1, "mountain": 0.1}
+tile_weightings = {"land": 0.3, "water": 0.4, "desert": 0.1, "mountain": 0.2}
+x_mark = "❎"
+fps = 60
+framerate = 1 / fps
 
 
 def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
@@ -11,23 +16,28 @@ def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
 
 def find_neighbors(current_map: list, current_row: int, current_column: int) -> list:
     neighbors = []
+    print(f"currently at: {current_row},{current_column}")
     if current_column != 0:
         neighbors.append(current_map[current_row][current_column - 1])
+    if current_column != len(current_map) - 1:
+        neighbors.append(current_map[current_row][current_column + 1])
     if current_row != 0:
         neighbors.append(current_map[current_row - 1][current_column])
+    if current_row != len(current_map[0]) - 1:
+        neighbors.append(current_map[current_row + 1][current_column])
     return neighbors
 
 
 def select_neighbor(neighbors: list, tiles: dict) -> str:
-    options = neighbors
+    options = [neighbor for neighbor in neighbors if neighbor != x_mark]
     options.append(grab_random_tile(tiles))
     return choice(options)
 
 
-def create_map(tiles: dict = map_tiles, rows: int = 25, columns: int = 0) -> list:
-    rows = rows
+def create_map(tiles: dict = map_tiles, rows: int = 0, columns: int = 0) -> list:
+    rows = 5 if rows <= 0 else rows
     columns = rows if columns <= 0 else columns
-    grid = [[f"{row}{column}" for row in range(rows)] for column in range(columns)]
+    grid = [[x_mark for _ in range(rows)] for _ in range(columns)]
     for r_index, row in enumerate(grid):
         for c_index, _ in enumerate(row):
             if r_index == 0 and c_index == 0:
@@ -35,6 +45,9 @@ def create_map(tiles: dict = map_tiles, rows: int = 25, columns: int = 0) -> lis
             else:
                 neighbors = find_neighbors(grid, r_index, c_index)
                 grid[r_index][c_index] = select_neighbor(neighbors, tiles)
+            print(print_map(grid))
+            sleep(framerate)
+            system("clear")
     return grid
 
 
