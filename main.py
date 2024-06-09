@@ -24,10 +24,10 @@ def select_neighbor(neighbors: list, tiles: dict) -> str:
     return choice(options)
 
 
-def create_map(tiles: dict = map_tiles, width: int = 50, height: int = 0) -> list:
-    rows = width
-    columns = rows if height <= 0 else height
-    grid = [["X" for _ in range(columns)] for _ in range(rows)]
+def create_map(tiles: dict = map_tiles, rows: int = 25, columns: int = 0) -> list:
+    rows = rows
+    columns = rows if columns <= 0 else columns
+    grid = [[f"{row}{column}" for row in range(rows)] for column in range(columns)]
     for r_index, row in enumerate(grid):
         for c_index, _ in enumerate(row):
             if r_index == 0 and c_index == 0:
@@ -47,8 +47,22 @@ def print_map(map: list) -> str:
     return res
 
 
+def get_map_dimensions() -> tuple:
+    def get_dimension(dimension: str) -> int:
+        try:
+            value = int(input(f"How {dimension} do you want your map to be?\n> "))
+        except:
+            raise ValueError()
+        return value
+
+    rows = get_dimension("wide")
+    columns = get_dimension("tall")
+    return rows, columns
+
+
 def main() -> None:
-    print(f"{print_map(create_map())}")
+    rows, columns = get_map_dimensions()
+    print(f"{print_map(create_map(map_tiles, rows, columns))}")
     print("\n")
     response = input("go again? Y for yes, anything else is no\n> ")
     if len(response) > 0:
