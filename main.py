@@ -2,10 +2,22 @@ from random import choice, sample
 from time import sleep
 from os import system
 
-map_tiles = {"land": "🟩", "water": "🟦", "desert": "🟨", "mountain": "🟫"}
-tile_weightings = {"land": 0.3, "water": 0.4, "desert": 0.1, "mountain": 0.2}
+map_tiles = {
+    "land": "🟩",
+    "water": "🟦",
+    "desert": "🟨",
+    "mountain": "🟫",
+    "snow": "⬜️",
+}
+tile_weightings = {
+    "land": 0.7,
+    "water": 0.8,
+    "desert": 0.2,
+    "mountain": 0.2,
+    "snow": 0.2,
+}
 x_mark = "❎"
-fps = 60
+fps = 120
 framerate = 1 / fps
 
 
@@ -19,11 +31,11 @@ def find_neighbors(current_map: list, current_row: int, current_column: int) -> 
     print(f"currently at: {current_row},{current_column}")
     if current_column != 0:
         neighbors.append(current_map[current_row][current_column - 1])
-    if current_column != len(current_map) - 1:
+    if current_column != len(current_map[0]) - 1:
         neighbors.append(current_map[current_row][current_column + 1])
     if current_row != 0:
         neighbors.append(current_map[current_row - 1][current_column])
-    if current_row != len(current_map[0]) - 1:
+    if current_row != len(current_map) - 1:
         neighbors.append(current_map[current_row + 1][current_column])
     return neighbors
 
@@ -54,9 +66,9 @@ def create_map(tiles: dict = map_tiles, rows: int = 0, columns: int = 0) -> list
 def print_map(map: list) -> str:
     res = ""
     for row in map:
+        res += "\n"
         for col in row:
             res += col
-        res += "\n"
     return res
 
 
