@@ -28,7 +28,7 @@ def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
 
 def find_neighbors(current_map: list, current_row: int, current_column: int) -> list:
     neighbors = []
-    print(f"currently at: {current_row},{current_column}")
+    # print(f"currently at: {current_row},{current_column}")
     if current_column != 0:
         neighbors.append(current_map[current_row][current_column - 1])
     if current_column != len(current_map[0]) - 1:
@@ -46,10 +46,7 @@ def select_neighbor(neighbors: list, tiles: dict) -> str:
     return choice(options)
 
 
-def create_map(tiles: dict = map_tiles, rows: int = 0, columns: int = 0) -> list:
-    rows = 5 if rows <= 0 else rows
-    columns = rows if columns <= 0 else columns
-    grid = [[x_mark for _ in range(rows)] for _ in range(columns)]
+def generate_random_neighbor(tiles, grid):
     for r_index, row in enumerate(grid):
         for c_index, _ in enumerate(row):
             if r_index == 0 and c_index == 0:
@@ -57,9 +54,17 @@ def create_map(tiles: dict = map_tiles, rows: int = 0, columns: int = 0) -> list
             else:
                 neighbors = find_neighbors(grid, r_index, c_index)
                 grid[r_index][c_index] = select_neighbor(neighbors, tiles)
-            print(print_map(grid))
-            sleep(framerate)
-            system("clear")
+            # print(print_map(grid))
+            # sleep(framerate)
+            # system("clear")
+    return grid
+
+
+def create_map(tiles: dict = map_tiles, rows: int = 0, columns: int = 0) -> list:
+    rows = 5 if rows <= 0 else rows
+    columns = rows if columns <= 0 else columns
+    grid = [[x_mark for _ in range(rows)] for _ in range(columns)]
+    grid = generate_random_neighbor(tiles, grid)
     return grid
 
 
