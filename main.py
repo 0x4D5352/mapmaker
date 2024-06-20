@@ -3,6 +3,7 @@ from time import sleep
 from datetime import date
 from itertools import count
 from os import system
+from typing import Callable
 
 map_tiles = {
     "land": "🟩",
@@ -50,18 +51,6 @@ def select_neighbor(neighbors: list, tiles: dict) -> str:
     return choice(options)
 
 
-def generate_random_neighbor(tiles: dict, grid: list) -> list:
-    for c_index, cols in enumerate(grid):
-        for r_index, _ in enumerate(cols):
-            if c_index == 0 and r_index == 0:
-                grid[c_index][r_index] = grab_random_tile(tiles)
-            else:
-                neighbors = find_neighbors(grid, c_index, r_index)
-                grid[c_index][r_index] = select_neighbor(neighbors, tiles)
-            print_running_map(grid)
-    return grid
-
-
 def grid_wrapper(x: int, table: list) -> int:
     return x % len(table)
 
@@ -76,7 +65,19 @@ def find_nearest_x(col: int, row: int, grid: list) -> tuple:
     return x_col, x_row
 
 
-def generate_wandering_neighbor(tiles: dict, grid: list) -> list:
+def generate_scrolling_neighbor_map(tiles: dict, grid: list) -> list:
+    for c_index, cols in enumerate(grid):
+        for r_index, _ in enumerate(cols):
+            if c_index == 0 and r_index == 0:
+                grid[c_index][r_index] = grab_random_tile(tiles)
+            else:
+                neighbors = find_neighbors(grid, c_index, r_index)
+                grid[c_index][r_index] = select_neighbor(neighbors, tiles)
+            print_running_map(grid)
+    return grid
+
+
+def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
     new_grid = grid
     cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
     current_column = choice(range(len(new_grid)))
@@ -116,11 +117,45 @@ def generate_wandering_neighbor(tiles: dict, grid: list) -> list:
     return new_grid
 
 
+def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
+    raise NotImplementedError
+
+
+def generate_realistic_map(tiles: dict, grid: list) -> list:
+    raise NotImplementedError
+
+
+def generate_random_map(tiles: dict, grid: list) -> list:
+    raise NotImplementedError
+
+
+def choose_strategy():
+    strategies = [
+        generate_scrolling_neighbor_map,
+        generate_wandering_neighbor_map,
+        generate_wave_function_collapse_map,
+        generate_realistic_map,
+        generate_random_map,
+    ]
+    try:
+        choice = strategies[
+            int(
+                input(
+                    f"Select your map strategy:\n{", ".join([name.__str__().split(" ")[1] for name in strategies])}\n> "
+                )
+            )
+            - 1
+        ]
+    except:
+        raise ValueError
+    return choice
+
+
 def create_map(
     tiles: dict = map_tiles,
     columns: int = 0,
     rows: int = 0,
-    strategy=generate_random_neighbor,
+    strategy: Callable = generate_scrolling_neighbor_map,
 ) -> list:
     columns = 5 if columns <= 0 else columns
     rows = columns if rows <= 0 else rows
@@ -165,22 +200,6 @@ def get_map_dimensions() -> tuple:
     columns = get_dimension("wide")
     rows = get_dimension("tall")
     return columns, rows
-
-
-def choose_strategy():
-    strategies = [generate_random_neighbor, generate_wandering_neighbor]
-    try:
-        choice = strategies[
-            int(
-                input(
-                    f"Select your map strategy:\n{", ".join([name.__str__().split(" ")[1] for name in strategies])}\n> "
-                )
-            )
-            - 1
-        ]
-    except:
-        raise ValueError
-    return choice
 
 
 def save_map(map) -> None:
