@@ -1,4 +1,4 @@
-from random import choice, sample
+from random import choice, sample, shuffle
 from time import sleep
 from datetime import date
 from itertools import count
@@ -55,6 +55,10 @@ def grid_wrapper(x: int, table: list) -> int:
     return x % len(table)
 
 
+def get_random_starting_cell(grid: list) -> tuple:
+    return choice(range(len(grid))), choice(range(len(grid[0])))
+
+
 def find_nearest_x(col: int, row: int, grid: list) -> tuple:
     x_col = col
     x_row = row
@@ -66,53 +70,53 @@ def find_nearest_x(col: int, row: int, grid: list) -> tuple:
 
 
 def generate_scrolling_neighbor_map(tiles: dict, grid: list) -> list:
-    for c_index, cols in enumerate(grid):
+    new_grid = grid
+    for c_index, cols in enumerate(new_grid):
         for r_index, _ in enumerate(cols):
             if c_index == 0 and r_index == 0:
-                grid[c_index][r_index] = grab_random_tile(tiles)
+                new_grid[c_index][r_index] = grab_random_tile(tiles)
             else:
-                neighbors = find_neighbors(grid, c_index, r_index)
-                grid[c_index][r_index] = select_neighbor(neighbors, tiles)
-            print_running_map(grid)
-    return grid
+                neighbors = find_neighbors(new_grid, c_index, r_index)
+                new_grid[c_index][r_index] = select_neighbor(neighbors, tiles)
+            print_running_map(new_grid)
+    return new_grid
 
 
 def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
     new_grid = grid
     cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-    current_column = choice(range(len(new_grid)))
-    current_rows = choice(range(len(new_grid[0])))
-    new_grid[current_column][current_rows] = grab_random_tile(tiles)
-    visited = [(current_column, current_rows)]
+    current_column, current_row = get_random_starting_cell(new_grid)
+    new_grid[current_column][current_row] = grab_random_tile(tiles)
+    visited = [(current_column, current_row)]
     while any(x_mark in rows for rows in new_grid):
-        current_cell = new_grid[current_column][current_rows]
-        new_grid[current_column][current_rows] = active_cell
+        current_cell = new_grid[current_column][current_row]
+        new_grid[current_column][current_row] = active_cell
         print_running_map(new_grid, visited)
         # choose a direction
         options = [
             (
                 grid_wrapper((current_column + x), new_grid),
-                grid_wrapper((current_rows + y), new_grid[0]),
+                grid_wrapper((current_row + y), new_grid[0]),
             )
             for x, y in cardinality
             if (
                 grid_wrapper(current_column + x, new_grid),
-                grid_wrapper(current_rows + y, new_grid[0]),
+                grid_wrapper(current_row + y, new_grid[0]),
             )
             not in visited
         ]
-        next_column, next_rows = (
+        next_column, next_row = (
             choice(options)
             if len(options) > 0
-            else find_nearest_x(current_column, current_rows, new_grid)
+            else find_nearest_x(current_column, current_row, new_grid)
         )
-        if new_grid[next_column][next_rows] == x_mark:
-            new_grid[current_column][current_rows] = current_cell
-            new_grid[next_column][next_rows] = select_neighbor(
-                find_neighbors(new_grid, next_column, next_rows), tiles
+        if new_grid[next_column][next_row] == x_mark:
+            new_grid[current_column][current_row] = current_cell
+            new_grid[next_column][next_row] = select_neighbor(
+                find_neighbors(new_grid, next_column, next_row), tiles
             )
-            current_column, current_rows = next_column, next_rows
-            visited.append((current_column, current_rows))
+            current_column, current_row = next_column, next_row
+            visited.append((current_column, current_row))
         print_running_map(new_grid, visited)
     return new_grid
 
@@ -126,7 +130,18 @@ def generate_realistic_map(tiles: dict, grid: list) -> list:
 
 
 def generate_random_map(tiles: dict, grid: list) -> list:
-    raise NotImplementedError
+    new_grid = grid
+    all_coords = [
+        (cols, rows)
+        for cols in range(len(new_grid))
+        for rows in range(len(new_grid[0]))
+    ]
+    shuffle(all_coords)
+    for coordinates in all_coords:
+        col, row = coordinates
+        new_grid[col][row] = grab_random_tile(tiles)
+        print_running_map(new_grid)
+    return new_grid
 
 
 def choose_strategy():
