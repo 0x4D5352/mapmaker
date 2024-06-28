@@ -144,7 +144,7 @@ def generate_random_map(tiles: dict, grid: list) -> list:
     return new_grid
 
 
-def choose_strategy():
+def choose_strategy() -> Callable:
     strategies = [
         generate_scrolling_neighbor_map,
         generate_wandering_neighbor_map,
@@ -161,8 +161,8 @@ def choose_strategy():
             )
             - 1
         ]
-    except:
-        raise ValueError
+    except ValueError:
+        raise ValueError("Please enter a valid number")
     return choice
 
 
@@ -208,8 +208,8 @@ def get_map_dimensions() -> tuple:
     def get_dimension(dimension: str) -> int:
         try:
             value = int(input(f"How {dimension} do you want your map to be?\n> "))
-        except:
-            raise ValueError
+        except ValueError:
+            raise ValueError("Please enter a valid number")
         return value
 
     columns = get_dimension("wide")
