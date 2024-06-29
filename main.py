@@ -12,6 +12,7 @@ map_tiles = {
     "mountain": "🟫",
     "snow": "⬜️",
 }
+
 tile_weightings = {
     "land": 0.7,
     "water": 0.8,
@@ -122,7 +123,32 @@ def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
 
 
 def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
+    """
+    logic for tile patterns:
+    cells can be next to themselves, otherwise:
+    water should only be next to land
+    land can be next to anything
+    deserts should only be next to mountains or land
+    mountains should only be next to land, deserts, or snow.
+    snow should onl be next to mountains
+    """
+    tile_patterns = [
+        ("🟩", "🟩"),
+        ("🟩", "🟦"),
+        ("🟩", "🟨"),
+        ("🟩", "🟫"),
+        ("🟦", "🟦"),
+        ("🟨", "🟨"),
+        ("🟨", "🟫"),
+        ("🟫", "🟫"),
+        ("🟫", "⬜️"),
+        ("⬜️", "⬜️"),
+    ]
+    new_grid = grid
+    cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    current_column, current_row = get_random_starting_cell(new_grid)
     raise NotImplementedError
+    return new_grid
 
 
 def generate_realistic_map(tiles: dict, grid: list) -> list:
