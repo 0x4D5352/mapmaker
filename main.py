@@ -20,12 +20,27 @@ tile_weightings = {
     "mountain": 0.2,
     "snow": 0.1,
 }
+# TODO: figure out spacing/sizing for the emojis
+numbers = {
+    0: "0️⃣",
+    1: "1️⃣",
+    2: "2️⃣",
+    3: "3️⃣",
+    4: "4️⃣",
+    5: "5️⃣",
+    6: "6️⃣",
+    7: "7️⃣",
+    8: "8️⃣",
+    9: "9️⃣",
+}
 x_mark = "❎"
 active_cell = "🟪"
-lock_framerate = False
+# question_mark = "❓"
+lock_framerate = True
 fps = 120
 framerate = 1 / fps
 counter = count()
+cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
 
 def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
@@ -35,6 +50,7 @@ def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
 
 def find_neighbors(current_map: list, current_column: int, current_row: int) -> list:
     neighbors = []
+    # orthogonal neighbors
     if current_column != 0:
         neighbors.append(current_map[current_column - 1][current_row])
     if current_column != len(current_map) - 1:
@@ -43,6 +59,18 @@ def find_neighbors(current_map: list, current_column: int, current_row: int) -> 
         neighbors.append(current_map[current_column][current_row - 1])
     if current_row != len(current_map[0]) - 1:
         neighbors.append(current_map[current_column][current_row + 1])
+    # diagonal neighbors
+    if current_column != 0 and current_row != 0:
+        neighbors.append(current_map[current_column - 1][current_row - 1])
+    if current_column != len(current_map) - 1 and current_row != 0:
+        neighbors.append(current_map[current_column + 1][current_row - 1])
+    if current_column != 0 and current_row != len(current_map[0]) - 1:
+        neighbors.append(current_map[current_column - 1][current_row + 1])
+    if (
+        current_column != len(current_map) - 1
+        and current_row != len(current_map[0]) - 1
+    ):
+        neighbors.append(current_map[current_column + 1][current_row + 1])
     return neighbors
 
 
@@ -85,7 +113,6 @@ def generate_scrolling_neighbor_map(tiles: dict, grid: list) -> list:
 
 def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
     new_grid = grid
-    cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
     current_column, current_row = get_random_starting_cell(new_grid)
     new_grid[current_column][current_row] = grab_random_tile(tiles)
     visited = [(current_column, current_row)]
@@ -125,29 +152,85 @@ def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
 def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
     """
     logic for tile patterns:
-    cells can be next to themselves, otherwise:
+    tiles can be next to themselves, otherwise:
     water should only be next to land
-    land can be next to anything
+    land can be next to anything but snow
     deserts should only be next to mountains or land
     mountains should only be next to land, deserts, or snow.
     snow should onl be next to mountains
     """
-    tile_patterns = [
+    # TODO: replace with calls to the appropriate key in the tileset at the top
+    tile_patterns = {
         ("🟩", "🟩"),
         ("🟩", "🟦"),
         ("🟩", "🟨"),
         ("🟩", "🟫"),
         ("🟦", "🟦"),
+        ("🟦", "🟩"),
+        ("🟨", "🟩"),
         ("🟨", "🟨"),
         ("🟨", "🟫"),
         ("🟫", "🟫"),
+        ("🟫", "🟩"),
         ("🟫", "⬜️"),
         ("⬜️", "⬜️"),
-    ]
+        ("⬜️", "🟫"),
+    }
+
+    def find_available_patterns(col: int, row: int) -> set:
+        available_patterns = set()
+        neighbors = find_neighbors(new_grid, col, row)
+        for neigbor in neighbors:
+            if neigbor != x_mark:
+                for pattern in tile_patterns:
+                    if pattern[0] == neigbor:
+                        available_patterns.add(pattern)
+        return available_patterns
+
+    def find_lowest_entropy(possibility_matrix: list) -> tuple:
+        lowest_entropy = float("inf")
+        lowest_coords = (0, 0)
+        for col_index, cols in enumerate(possibility_matrix):
+            for row_index, entropy in enumerate(cols):
+                if entropy < lowest_entropy:
+                    lowest_entropy = entropy
+                    lowest_coords = (col_index, row_index)
+        return lowest_coords
+
+    def update_possibility_matrix(
+        current_column: int, current_row: int, possibility_matrix: list
+    ) -> list:
+        for col_index, cols in enumerate(possibility_matrix):
+            for row_index, entropy in enumerate(cols):
+                if new_grid[col_index][row_index] == x_mark:
+                    available_patterns = find_available_patterns(col_index, row_index)
+                    for _ in available_patterns:
+                        possibility_matrix[col_index][row_index] += 1
+        return possibility_matrix
+
+    # TODO: create more tile patterns for larger cell clusters
     new_grid = grid
-    cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    observed = set()
+    possibility_matrix = [
+        [len(tile_patterns) for _ in range(len(new_grid[0]))]
+        for _ in range(len(new_grid))
+    ]
     current_column, current_row = get_random_starting_cell(new_grid)
-    raise NotImplementedError
+    observed.add((current_column, current_row))
+    possibility_matrix[current_column][current_row] = 0
+
+    """
+    what am i doing after this?
+    1. assign the current cell a random tile
+    2. update the possibility matrix
+    3. find the cell with the lowest entropy
+    4. make a choice from the available tile patterns
+    5. update the grid
+    6. repeat until all cells are observed
+    """
+    new_grid[current_column][current_row] = grab_random_tile(tiles)
+    while len(observed) < len(new_grid) * len(new_grid[0]):
+        pass
     return new_grid
 
 
