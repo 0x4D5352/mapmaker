@@ -177,6 +177,16 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
         ("⬜️", "🟫"),
     }
 
+    """
+    okay so here's what i need to do:
+    - instead of the probability matrix containing the sum of options, it should just contain the options
+    - when updating the matrix, it should look into each cell and see if it has a color already.
+    - if it does, it should EMIT the patterns are available to any neighbor that is currently an x_mark
+    - i need to figure out how to handle intercepts, e.g if opposing neighbors are different colors, the possibilties should be the smallest subset of the two.
+    - that way, the lowest entropy cell will be the cell or cells that have the fewest available options.
+    - sure it's a bit more expensive, but it will be a more accurate representation of state.
+    """
+
     def find_available_patterns(col: int, row: int) -> set:
         available_patterns = set()
         neighbors = find_neighbors(new_grid, col, row)
