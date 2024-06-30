@@ -185,6 +185,10 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
     - i need to figure out how to handle intercepts, e.g if opposing neighbors are different colors, the possibilties should be the smallest subset of the two.
     - that way, the lowest entropy cell will be the cell or cells that have the fewest available options.
     - sure it's a bit more expensive, but it will be a more accurate representation of state.
+
+    additional questions:
+    - how do i reintroduce weighting?
+    - 
     """
 
     def find_available_patterns(col: int, row: int) -> set:
@@ -214,8 +218,10 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
             for row_index, entropy in enumerate(cols):
                 if new_grid[col_index][row_index] == x_mark:
                     available_patterns = find_available_patterns(col_index, row_index)
-                    for _ in available_patterns:
-                        possibility_matrix[col_index][row_index] += 1
+                    possibility_matrix[col_index][row_index] = (
+                        len(available_patterns),
+                        available_patterns,
+                    )
         return possibility_matrix
 
     # TODO: create more tile patterns for larger cell clusters
