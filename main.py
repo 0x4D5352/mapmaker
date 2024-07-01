@@ -11,6 +11,7 @@ map_tiles = {
     "desert": "🟨",
     "mountain": "🟫",
     "snow": "⬜️",
+    "swamp": "🟪",
 }
 
 tile_weightings = {
@@ -19,6 +20,7 @@ tile_weightings = {
     "desert": 0.2,
     "mountain": 0.2,
     "snow": 0.1,
+    "swamp": 0.1,
 }
 # TODO: figure out spacing/sizing for the emojis
 numbers = {
@@ -34,7 +36,7 @@ numbers = {
     9: "9️⃣",
 }
 x_mark = "❎"
-active_cell = "🟪"
+active_cell = "❓"
 # question_mark = "❓"
 lock_framerate = True
 fps = 120
