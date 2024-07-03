@@ -159,24 +159,31 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
     land can be next to anything but snow
     deserts should only be next to mountains or land
     mountains should only be next to land, deserts, or snow.
-    snow should onl be next to mountains
+    snow should only be next to mountains
+    swamps should only be next to land, water, and mountains
     """
-    # TODO: replace with calls to the appropriate key in the tileset at the top
     tile_patterns = {
-        ("🟩", "🟩"),
-        ("🟩", "🟦"),
-        ("🟩", "🟨"),
-        ("🟩", "🟫"),
-        ("🟦", "🟦"),
-        ("🟦", "🟩"),
-        ("🟨", "🟩"),
-        ("🟨", "🟨"),
-        ("🟨", "🟫"),
-        ("🟫", "🟫"),
-        ("🟫", "🟩"),
-        ("🟫", "⬜️"),
-        ("⬜️", "⬜️"),
-        ("⬜️", "🟫"),
+        ("land", "land"),
+        ("land", "water"),
+        ("land", "desert"),
+        ("land", "mountain"),
+        ("land", "swamp"),
+        ("water", "water"),
+        ("water", "land"),
+        ("water", "swamp"),
+        ("desert", "land"),
+        ("desert", "desert"),
+        ("desert", "mountain"),
+        ("mountain", "mountain"),
+        ("mountain", "land"),
+        ("mountain", "snow"),
+        ("mountain", "swamp"),
+        ("snow", "snow"),
+        ("snow", "mountain"),
+        ("swamp", "land"),
+        ("swamp", "water"),
+        ("swamp", "mountain"),
+        ("swamp", "swamp"),
     }
 
     """
