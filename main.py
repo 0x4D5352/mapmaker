@@ -15,12 +15,12 @@ map_tiles = {
 }
 
 tile_weightings = {
-    "land": 0.7,
-    "water": 0.8,
+    "land": 0.8,
+    "water": 0.9,
     "desert": 0.2,
     "mountain": 0.2,
     "snow": 0.1,
-    "swamp": 0.1,
+    "swamp": 0.2,
 }
 # TODO: figure out spacing/sizing for the emojis
 numbers = {
