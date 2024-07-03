@@ -17,7 +17,7 @@ map_tiles = {
 tile_weightings = {
     "land": 0.8,
     "water": 0.9,
-    "desert": 0.2,
+    "desert": 0.1,
     "mountain": 0.2,
     "snow": 0.1,
     "swamp": 0.2,
