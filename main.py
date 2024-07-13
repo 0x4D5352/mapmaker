@@ -45,12 +45,16 @@ counter = count()
 cardinality = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
 
-def grab_random_tile(tiles: dict, weights: dict = tile_weightings) -> str:
+def grab_random_tile(
+    tiles: dict[str, str], weights: dict[str, float] = tile_weightings
+) -> str:
     weighted_tiles = [int(weight * 10) for weight in weights.values()]
     return tiles[choice(sample(list(tiles), k=1, counts=weighted_tiles))]
 
 
-def find_neighbors(current_map: list, current_column: int, current_row: int) -> list:
+def find_neighbors(
+    current_map: list[list], current_column: int, current_row: int
+) -> list:
     neighbors = []
     # orthogonal neighbors
     if current_column != 0:
@@ -76,21 +80,21 @@ def find_neighbors(current_map: list, current_column: int, current_row: int) -> 
     return neighbors
 
 
-def select_neighbor(neighbors: list, tiles: dict) -> str:
+def select_neighbor(neighbors: list, tiles: dict[str, str]) -> str:
     options = [neighbor for neighbor in neighbors if neighbor != x_mark]
     options.append(grab_random_tile(tiles))
     return choice(options)
 
 
-def grid_wrapper(x: int, table: list) -> int:
+def grid_wrapper(x: int, table: list[list]) -> int:
     return x % len(table)
 
 
-def get_random_starting_cell(grid: list) -> tuple:
+def get_random_starting_cell(grid: list[list]) -> tuple[int, int]:
     return choice(range(len(grid))), choice(range(len(grid[0])))
 
 
-def find_nearest_x(col: int, row: int, grid: list) -> tuple:
+def find_nearest_x(col: int, row: int, grid: list) -> tuple[int, int]:
     x_col = col
     x_row = row
 
@@ -100,7 +104,9 @@ def find_nearest_x(col: int, row: int, grid: list) -> tuple:
     return x_col, x_row
 
 
-def generate_scrolling_neighbor_map(tiles: dict, grid: list) -> list:
+def generate_scrolling_neighbor_map(
+    tiles: dict[str, str], grid: list[list]
+) -> list[list]:
     new_grid = grid
     for c_index, cols in enumerate(new_grid):
         for r_index, _ in enumerate(cols):
@@ -113,7 +119,7 @@ def generate_scrolling_neighbor_map(tiles: dict, grid: list) -> list:
     return new_grid
 
 
-def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
+def generate_wandering_neighbor_map(tiles: dict[str, str], grid: list) -> list:
     new_grid = grid
     current_column, current_row = get_random_starting_cell(new_grid)
     new_grid[current_column][current_row] = grab_random_tile(tiles)
@@ -151,7 +157,7 @@ def generate_wandering_neighbor_map(tiles: dict, grid: list) -> list:
     return new_grid
 
 
-def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
+def generate_wave_function_collapse_map(tiles: dict[str, str], grid: list) -> list:
     """
     logic for tile patterns:
     tiles can be next to themselves, otherwise:
@@ -200,9 +206,9 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
     - 
     """
 
-    def find_available_patterns(col: int, row: int) -> set:
+    def find_available_patterns(col: int, row: int, grid: list) -> set[tuple[str, str]]:
         available_patterns = set()
-        neighbors = find_neighbors(new_grid, col, row)
+        neighbors = find_neighbors(grid, col, row)
         for neigbor in neighbors:
             if neigbor != x_mark:
                 for pattern in tile_patterns:
@@ -210,7 +216,7 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
                         available_patterns.add(pattern)
         return available_patterns
 
-    def find_lowest_entropy(possibility_matrix: list) -> tuple:
+    def find_lowest_entropy(possibility_matrix: list) -> tuple[int, int]:
         lowest_entropy = float("inf")
         lowest_coords = (0, 0)
         for col_index, cols in enumerate(possibility_matrix):
@@ -221,12 +227,17 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
         return lowest_coords
 
     def update_possibility_matrix(
-        current_column: int, current_row: int, possibility_matrix: list
-    ) -> list:
+        current_column: int,
+        current_row: int,
+        possibility_matrix: list[list],
+        grid: list[list],
+    ) -> list[list]:
         for col_index, cols in enumerate(possibility_matrix):
             for row_index, entropy in enumerate(cols):
-                if new_grid[col_index][row_index] == x_mark:
-                    available_patterns = find_available_patterns(col_index, row_index)
+                if grid[col_index][row_index] == x_mark:
+                    available_patterns = find_available_patterns(
+                        col_index, row_index, grid
+                    )
                     possibility_matrix[col_index][row_index] = (
                         len(available_patterns),
                         available_patterns,
@@ -259,11 +270,11 @@ def generate_wave_function_collapse_map(tiles: dict, grid: list) -> list:
     return new_grid
 
 
-def generate_realistic_map(tiles: dict, grid: list) -> list:
+def generate_realistic_map(tiles: dict[str, str], grid: list[list]) -> list[list]:
     raise NotImplementedError
 
 
-def generate_random_map(tiles: dict, grid: list) -> list:
+def generate_random_map(tiles: dict[str, str], grid: list[list]) -> list[list]:
     new_grid = grid
     all_coords = [
         (cols, rows)
@@ -301,11 +312,11 @@ def choose_strategy() -> Callable:
 
 
 def create_map(
-    tiles: dict = map_tiles,
+    tiles: dict[str, str] = map_tiles,
     columns: int = 0,
     rows: int = 0,
     strategy: Callable = generate_scrolling_neighbor_map,
-) -> list:
+) -> list[list]:
     columns = 5 if columns <= 0 else columns
     rows = columns if rows <= 0 else rows
     grid = [[x_mark for _ in range(columns)] for _ in range(rows)]
@@ -313,7 +324,7 @@ def create_map(
     return grid
 
 
-def print_map(map: list) -> str:
+def print_map(map: list[list]) -> str:
     res = ""
     for col in map:
         res += "\n"
@@ -323,7 +334,7 @@ def print_map(map: list) -> str:
     return res
 
 
-def print_running_map(grid: list, visited: list = []) -> None:
+def print_running_map(grid: list[list], visited: list = []) -> None:
     area = len(grid) * len(grid[0])
     system("clear")
     print("completing map...")
@@ -338,7 +349,7 @@ def print_running_map(grid: list, visited: list = []) -> None:
         sleep(framerate)
 
 
-def get_map_dimensions() -> tuple:
+def get_map_dimensions() -> tuple[int, int]:
     def get_dimension(dimension: str) -> int:
         try:
             value = int(input(f"How {dimension} do you want your map to be?\n> "))
@@ -351,7 +362,7 @@ def get_map_dimensions() -> tuple:
     return columns, rows
 
 
-def save_map(map) -> None:
+def save_map(map: str) -> None:
     with open(
         f"{date.today()}_map_{next(counter)}.emoji", "w", encoding="utf-8"
     ) as image:
