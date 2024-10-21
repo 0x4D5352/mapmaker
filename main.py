@@ -207,6 +207,9 @@ def generate_wave_function_collapse_map(tiles: dict[str, str], grid: list) -> li
     """
 
     def find_available_patterns(col: int, row: int, grid: list) -> set[tuple[str, str]]:
+        """
+        take in a cell's coordinates in the UTF-8 grid and returns a list of possible options.
+        """
         available_patterns = set()
         neighbors = find_neighbors(grid, col, row)
         for neigbor in neighbors:
@@ -220,7 +223,8 @@ def generate_wave_function_collapse_map(tiles: dict[str, str], grid: list) -> li
         lowest_entropy = float("inf")
         lowest_coords = (0, 0)
         for col_index, cols in enumerate(possibility_matrix):
-            for row_index, entropy in enumerate(cols):
+            for row_index, options in enumerate(cols):
+                entropy = len(options)
                 if entropy < lowest_entropy:
                     lowest_entropy = entropy
                     lowest_coords = (col_index, row_index)
